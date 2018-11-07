@@ -10,9 +10,12 @@ import {
     Animated
 } from 'react-native';
 import { Card, Icon, FormInput, Button } from 'react-native-elements';
-import { BarChart, Grid, XAxis, YAxis } from 'react-native-svg-charts';
+import { BarChart, Grid, XAxis, YAxis, StackedAreaChart } from 'react-native-svg-charts';
+import { LinearGradient, Stop, Defs } from 'react-native-svg';
 import { connect } from 'react-redux';
-import { colorAppPrimary, colorAppSecondary } from '../../utils/constants';
+import * as shape from 'd3-shape';
+import { colorAppPrimary } from '../../utils/constants';
+import { Actions } from 'react-native-router-flux';
 
 class Login extends React.Component {
 
@@ -20,12 +23,14 @@ class Login extends React.Component {
         super(props);
 
         this.changedLayout = true;
+        this.numCharts = ['bar', 'area'];
 
         StatusBar.setBackgroundColor(colorAppPrimary, true);
 
         this.onPressEnter = this.onPressEnter.bind(this);
         this.keyboardShow = this.keyboardShow.bind(this);
         this.keyboardHide = this.keyboardHide.bind(this);
+        this.renderStackedAreaChart = this.renderStackedAreaChart.bind(this);
         this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardShow);
         this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardHide);
 
@@ -37,8 +42,23 @@ class Login extends React.Component {
             animCard: new Animated.Value(0),
             viewCardFields: 0,
             loadingOn: false,
+            chartChoosed: this.numCharts[Math.floor(Math.random() * this.numCharts.length)],
             data: [
                 50, 10, 40, 95, 4, 24, null, 85, undefined, 0, 35, 53
+            ],
+            months: [ 
+                'Jan', 
+                'Fev', 
+                'Mar', 
+                'Abr', 
+                'Mai', 
+                'Jun', 
+                'Jul', 
+                'Ago', 
+                'Set', 
+                'Out', 
+                'Nov', 
+                'Dez'
             ]
         };
     }
@@ -47,7 +67,7 @@ class Login extends React.Component {
         this.setState({ loadingOn: true });
         setTimeout(() => {
             this.setState({ loadingOn: false });
-            // Actions...
+            Actions.mainTabBar();
         }, 3000);
     }
 
@@ -76,7 +96,13 @@ class Login extends React.Component {
                     useNativeDriver: true
                 }
             )
-        ], { useNativeDriver: true }).start();
+        ], { useNativeDriver: true }).start(() => {
+            if (this.state.chartChoosed === 'bar') {
+                this.setState({ chartChoosed: 'area' });
+            } else {
+                this.setState({ chartChoosed: 'bar' });
+            }
+        });
     }
     
     keyboardHide() {
@@ -99,29 +125,90 @@ class Login extends React.Component {
         ], { useNativeDriver: true }).start();
     }
 
-    render() {
-        const contentInset = { top: 20, bottom: 20 };
-        const months = [ 
-            'Jan', 
-            'Fev', 
-            'Mar', 
-            'Abr', 
-            'Mai', 
-            'Jun', 
-            'Jul', 
-            'Ago', 
-            'Set', 
-            'Out', 
-            'Nov', 
-            'Dez'
+    renderBarChart() {
+        const Gradient = () => (
+            <Defs key={'gradient'}>
+                <LinearGradient id={'gradient'} x1={'0%'} y={'0%'} x2={'0%'} y2={'100%'}>
+                    <Stop offset={'0%'} stopColor={'rgb(134, 65, 244)'} />
+                    <Stop offset={'100%'} stopColor={'rgb(66, 194, 244)'} />
+                </LinearGradient>
+            </Defs>
+        );
+
+        return (
+            <BarChart
+                style={{ flex: 1, marginLeft: 16 }}
+                data={this.state.data}
+                svg={{ 
+                    strokeWidth: 2,
+                    fill: 'url(#gradient)' 
+                }}
+                contentInset={{ top: 20, bottom: 20 }}
+            >
+                <Grid
+                    svg={{
+                        stroke: 'grey'
+                    }}
+                />
+                <Gradient />
+            </BarChart>
+        );
+    }
+
+    renderStackedAreaChart() {
+        const data = [
+            {
+                month: new Date(2015, 0, 1),
+                apples: 3840,
+                bananas: 1920,
+                cherries: 960,
+                dates: 400,
+            },
+            {
+                month: new Date(2015, 1, 1),
+                apples: 1600,
+                bananas: 1440,
+                cherries: 960,
+                dates: 400,
+            },
+            {
+                month: new Date(2015, 2, 1),
+                apples: 640,
+                bananas: 960,
+                cherries: 3640,
+                dates: 400,
+            },
+            {
+                month: new Date(2015, 3, 1),
+                apples: 3320,
+                bananas: 480,
+                cherries: 640,
+                dates: 400,
+            },
         ];
 
+        const colors = ['#8800cc', '#aa00ff', '#cc66ff', '#eeccff'];
+        const keys = ['apples', 'bananas', 'cherries', 'dates'];
+
+        return (
+            <StackedAreaChart
+                style={{ height: 180, paddingVertical: 16, paddingLeft: 16 }}
+                data={data}
+                keys={keys}
+                colors={colors}
+                curve={shape.curveNatural}
+                showGrid={false}
+            />
+        );
+    }
+
+    render() {
         return (
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                 <View style={styles.mainView}>
                     <Animated.View
                         style={{
-                            flex: 1.7,
+                            flex: 1.8,
                             opacity: this.state.animChart.interpolate({
                                 inputRange: [0, 1],
                                 outputRange: [0, 1],
@@ -133,12 +220,13 @@ class Login extends React.Component {
                             style={{
                                 paddingHorizontal: 15, 
                                 flexDirection: 'row',
-                                height: 200,
+                                height: 200
                             }}
                         >
                             <YAxis
+                                style={{ paddingBottom: 16 }}
                                 data={this.state.data}
-                                contentInset={contentInset}
+                                contentInset={{ top: 20, bottom: 20 }}
                                 svg={{
                                     fill: 'grey',
                                     fontSize: 10,
@@ -147,22 +235,16 @@ class Login extends React.Component {
                                 formatLabel={value => `${value}%`}
                             />
                             <View style={{ flex: 1 }}>
-                                <BarChart
-                                    style={{ flex: 1, marginLeft: 16 }}
-                                    data={this.state.data}
-                                    svg={{ fill: colorAppSecondary }}
-                                    contentInset={contentInset}
-                                >
-                                    <Grid
-                                        svg={{
-                                            stroke: 'grey'
-                                        }}
-                                    />
-                                </BarChart>
+                                { 
+                                    this.state.chartChoosed === 'bar' ? 
+                                    (this.renderBarChart()) 
+                                    : 
+                                    (this.renderStackedAreaChart())
+                                }
                                 <XAxis
                                     style={{ marginLeft: 16 }}
                                     data={this.state.data}
-                                    formatLabel={(value, index) => months[index]}
+                                    formatLabel={(value, index) => this.state.months[index]}
                                     contentInset={{ left: 10, right: 10 }}
                                     svg={{ fontSize: 10, fill: 'grey' }}
                                 />

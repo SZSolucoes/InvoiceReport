@@ -1,13 +1,23 @@
 import React from 'react';
-import { Router, Scene } from 'react-native-router-flux';
+import { Router, Scene, ActionConst } from 'react-native-router-flux';
 import { 
     StyleSheet,
     View,
-    Platform
+    Platform,
+    TouchableOpacity
 } from 'react-native';
+import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 
+import SideMenu from './components/main/SideMenu';
+import FadeScreenAnim from './components/main/FadeScreenAnim';
 import Login from './components/login/Login';
+import Diario from './components/main/Diario';
+import Acumulado from './components/main/Acumulado';
+import Projecao from './components/main/Projecao';
+
+import { store } from './App';
+import { colorAppSecondary, colorAppPrimary, getMenuName } from './utils/constants';
 
 class Routes extends React.Component {
 
@@ -15,6 +25,37 @@ class Routes extends React.Component {
         super(props);
 
         this.renderRouter = this.renderRouter.bind(this);
+        this.renderLeftGlobalMenuBtn = this.renderLeftGlobalMenuBtn.bind(this);
+    }
+
+    renderLeftGlobalMenuBtn() {
+        return (
+            <View 
+                style={{
+                    flexDirection: 'row',
+                    marginHorizontal: 5,
+                    paddingHorizontal: 10,
+                    justifyContent: 'space-between'
+                }}
+            >
+                <TouchableOpacity
+                    onPress={() => {
+                        store.dispatch({
+                            type: 'modify_issidemenuopen_events',
+                            payload: true
+                        });
+                    }}
+                >
+                    <Icon
+                        iconStyle={{ marginHorizontal: 5 }}
+                        color={'white'}
+                        name='menu'
+                        type='material-community'
+                        size={26}
+                    />
+                </TouchableOpacity>
+            </View>
+        );
     }
 
     renderRouter() {
@@ -32,6 +73,45 @@ class Routes extends React.Component {
                         initial
                         hideNavBar
                     />
+                    <Scene
+                        key={'mainTabBar'}
+                        tabs
+                        showLabel
+                        tabBarPosition={'top'}
+                        lazy={false}
+                        swipeEnabled
+                        title={getMenuName(store.getState().EventsReducer.sideMenuSelected)} 
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        tabBarStyle={{ backgroundColor: colorAppSecondary }}
+                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        type={ActionConst.RESET}
+                        renderLeftButton={() => this.renderLeftGlobalMenuBtn()}
+                    >
+                        <Scene 
+                            key={'diarioTab'}
+                            hideNavBar 
+                            component={Diario}
+                            initial
+                            tabBarLabel={'Diário'}
+                            activeTintColor={'white'} 
+                        />
+                        <Scene 
+                            key={'acumuladoTab'}
+                            hideNavBar 
+                            component={Acumulado}
+                            tabBarLabel={'Acumulado'}
+                            activeTintColor={'white'} 
+                        />
+                        <Scene 
+                            key={'projecaoTab'}
+                            hideNavBar 
+                            component={Projecao}
+                            tabBarLabel={'Projeção'}
+                            activeTintColor={'white'} 
+                        />
+                    </Scene>
                 </Scene>
             </Router>
         );
@@ -41,6 +121,8 @@ class Routes extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 {this.renderRouter()}
+                <FadeScreenAnim />
+                <SideMenu />
             </View>
         );
     }
@@ -48,7 +130,7 @@ class Routes extends React.Component {
 
 const styles = StyleSheet.create({
     header: {
-        backgroundColor: 'blue',
+        backgroundColor: colorAppPrimary,
         borderBottomWidth: 0,
         ...Platform.select({
             android: {

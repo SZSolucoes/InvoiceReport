@@ -1,5 +1,8 @@
 const INITIAL_STATE = {
-    conInfo: {}
+    conInfo: {},
+    isSideMenuOpen: false,
+    sideMenuSelected: 'regiao',
+    dxSideMenuPos: 0
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -9,7 +12,31 @@ export default (state = INITIAL_STATE, action) => {
                 ...state,
                 conInfo: { ...action.payload } 
             };
+        case 'modify_issidemenuopen_events':
+            return {
+                ...state,
+                isSideMenuOpen: action.payload 
+            };
+        case 'modify_sidemenuselected_events':
+            return {
+                ...state,
+                sideMenuSelected: action.payload 
+            };
+        case 'modify_dxsidemenupos_events':
+            return {
+                ...state,
+                dxSideMenuPos: action.payload 
+            };
+        case 'modify_clean_events':
+            return {
+                ...state,
+                conInfo: {},
+                isSideMenuOpen: false,
+                sideMenuSelected: 'regiao',
+                dxSideMenuPos: 0
+            };
         default:
             return state;
     }
 };
+

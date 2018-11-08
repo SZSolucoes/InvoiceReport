@@ -17,6 +17,7 @@ import {
     modifySideMenuSelected, 
     modifyDxSideMenuPos 
 } from '../../actions/EventsActions';
+import { modifyReportSelected } from '../../actions/ReportActions';
 import { colorAppPrimary } from '../../utils/constants';
 
 class SideMenu extends React.Component {
@@ -91,28 +92,33 @@ class SideMenu extends React.Component {
     onPressItemMenu(key) {
         switch (key) {
             case 'regiao':
-                Actions.reset('mainTabBar', { title: 'Região' });
+                this.props.modifyReportSelected('regiao');
                 this.props.modifyIsSideMenuOpen(false);
+                Actions.reset('mainTabBar', { title: 'Região' });
                 this.props.modifySideMenuSelected('regiao');
                 break;
-            case 'equipe':
-                Actions.reset('mainTabBar', { title: 'Equipe' });
+            case 'equipe':  
+                this.props.modifyReportSelected('equipe');
                 this.props.modifyIsSideMenuOpen(false);
+                Actions.reset('mainTabBar', { title: 'Equipe' });
                 this.props.modifySideMenuSelected('equipe');
                 break;
             case 'estabelecimento':
-                Actions.reset('mainTabBar', { title: 'Estabelecimento' });
+                this.props.modifyReportSelected('estabelecimento');
                 this.props.modifyIsSideMenuOpen(false);
+                Actions.reset('mainTabBar', { title: 'Estabelecimento' });
                 this.props.modifySideMenuSelected('estabelecimento');
                 break;
             case 'bu':
-                Actions.reset('mainTabBar', { title: 'BU' });
+                this.props.modifyReportSelected('bu');
                 this.props.modifyIsSideMenuOpen(false);
+                Actions.reset('mainTabBar', { title: 'BU' });
                 this.props.modifySideMenuSelected('bu');
                 break;
             case 'segmento':
-                Actions.reset('mainTabBar', { title: 'Segmento' });
+                this.props.modifyReportSelected('segmento');
                 this.props.modifyIsSideMenuOpen(false);
+                Actions.reset('mainTabBar', { title: 'Segmento' });
                 this.props.modifySideMenuSelected('segmento');
                 break;
             default:
@@ -357,5 +363,6 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, { 
     modifyIsSideMenuOpen,
     modifySideMenuSelected,
-    modifyDxSideMenuPos
+    modifyDxSideMenuPos,
+    modifyReportSelected
 })(SideMenu);

@@ -8,6 +8,7 @@ import Axios from 'axios';
 
 import reducers from './reducers';
 import Routes from './Routes';
+import { fetchReport } from './utils/AxiosUtils';
 
 export const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
 
@@ -16,6 +17,9 @@ class App extends React.Component {
         super(props);
 
         Axios.defaults.timeout = 80000; // Timeout default para o Axios
+        Axios.defaults.baseURL = 'http://192.168.0.148:1234/';
+
+        fetchReport(store.dispatch);
 
         this.onNetInfoChanged = this.onNetInfoChanged.bind(this);
 

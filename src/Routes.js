@@ -9,6 +9,7 @@ import {
 import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 
+import SearchBarMain from './components/main/SearchBarMain';
 import SideMenu from './components/main/SideMenu';
 import FadeScreenAnim from './components/main/FadeScreenAnim';
 import Login from './components/login/Login';
@@ -26,6 +27,32 @@ class Routes extends React.Component {
 
         this.renderRouter = this.renderRouter.bind(this);
         this.renderLeftGlobalMenuBtn = this.renderLeftGlobalMenuBtn.bind(this);
+        this.renderMainTabBarBtns = this.renderMainTabBarBtns.bind(this);
+    }
+
+    renderMainTabBarBtns() {
+        return (
+            <View 
+                style={{
+                    flexDirection: 'row',
+                    marginHorizontal: 5,
+                    paddingHorizontal: 10,
+                    justifyContent: 'space-between'
+                }}
+            >
+                <TouchableOpacity
+                    onPress={() => this.searchBarMainRef.getWrappedInstance().show()}
+                >
+                    <Icon
+                        iconStyle={{ marginHorizontal: 5 }}
+                        color={'white'}
+                        name='magnify'
+                        type='material-community'
+                        size={26}
+                    />
+                </TouchableOpacity>
+            </View>
+        );
     }
 
     renderLeftGlobalMenuBtn() {
@@ -88,6 +115,7 @@ class Routes extends React.Component {
                         labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
                         type={ActionConst.RESET}
                         renderLeftButton={() => this.renderLeftGlobalMenuBtn()}
+                        renderRightButton={() => this.renderMainTabBarBtns()}
                     >
                         <Scene 
                             key={'diarioTab'}
@@ -121,6 +149,7 @@ class Routes extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 {this.renderRouter()}
+                <SearchBarMain ref={ref => (this.searchBarMainRef = ref)} />
                 <FadeScreenAnim />
                 <SideMenu />
             </View>

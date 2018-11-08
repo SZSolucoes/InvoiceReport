@@ -13,9 +13,9 @@ import { Card, Icon, FormInput, Button } from 'react-native-elements';
 import { BarChart, Grid, XAxis, YAxis, StackedAreaChart } from 'react-native-svg-charts';
 import { LinearGradient, Stop, Defs } from 'react-native-svg';
 import { connect } from 'react-redux';
+import { Actions } from 'react-native-router-flux';
 import * as shape from 'd3-shape';
 import { colorAppPrimary } from '../../utils/constants';
-import { Actions } from 'react-native-router-flux';
 
 class Login extends React.Component {
 
@@ -30,9 +30,9 @@ class Login extends React.Component {
         this.onPressEnter = this.onPressEnter.bind(this);
         this.keyboardShow = this.keyboardShow.bind(this);
         this.keyboardHide = this.keyboardHide.bind(this);
-        this.renderStackedAreaChart = this.renderStackedAreaChart.bind(this);
         this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardShow);
         this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardHide);
+        this.renderStackedAreaChart = this.renderStackedAreaChart.bind(this);
 
         this.state = {
             inputUserPasswordEye: true,
@@ -61,6 +61,11 @@ class Login extends React.Component {
                 'Dez'
             ]
         };
+    }
+
+    componentWillUnmount() {
+        this.keyboardDidShowListener.remove();
+        this.keyboardDidHideListener.remove();
     }
 
     onPressEnter() {
@@ -301,7 +306,8 @@ class Login extends React.Component {
                                         returnKeyType={'next'}
                                         inputStyle={styles.input}
                                         placeholder={'Usuário'}
-                                        placeholderTextColor={'#4E5576'}
+                                        placeholderTextColor={'grey'}
+                                        autoCapitalize={'none'}
                                         onSubmitEditing={
                                             () => this.userPasswordFieldRef.focus()
                                         }
@@ -345,7 +351,7 @@ class Login extends React.Component {
                                         containerStyle={styles.formInputContainer}
                                         inputStyle={styles.input}
                                         placeholder={'Senha'}
-                                        placeholderTextColor={'#4E5576'}
+                                        placeholderTextColor={'grey'}
                                         secureTextEntry={this.state.inputUserPasswordEye}
                                         autoCapitalize={'none'}
                                         autoCorrect={false}

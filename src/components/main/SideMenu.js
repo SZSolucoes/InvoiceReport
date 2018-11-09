@@ -90,6 +90,10 @@ class SideMenu extends React.Component {
     }
 
     onPressItemMenu(key) {
+        if (key === this.props.sideMenuSelected) {
+            this.props.modifyIsSideMenuOpen(false);
+            return;
+        }
         switch (key) {
             case 'regiao':
                 this.props.modifyReportSelected('regiao');

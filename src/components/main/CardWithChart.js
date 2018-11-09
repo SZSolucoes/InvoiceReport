@@ -51,7 +51,7 @@ class CardWithChart extends React.Component {
                 style={{
                     paddingHorizontal: 15, 
                     flexDirection: 'row',
-                    height: 200
+                    height: 220
                 }}
             >
                 <YAxis
@@ -108,10 +108,9 @@ class CardWithChart extends React.Component {
 
         return (
             <View
-                style={{
-                    paddingRight: 15, 
+                style={{ 
                     flexDirection: 'row',
-                    height: 200
+                    height: 220,
                 }}
             >
                 <YAxis
@@ -120,7 +119,7 @@ class CardWithChart extends React.Component {
                     contentInset={{ top: 20, bottom: 20 }}
                     svg={{
                         fill: 'black',
-                        fontSize: 10,
+                        fontSize: 12,
                     }}
                     numberOfTicks={10}
                     formatLabel={value => value}
@@ -134,6 +133,8 @@ class CardWithChart extends React.Component {
                             fill: 'url(#gradient)' 
                         }}
                         contentInset={{ top: 20, bottom: 20 }}
+                        spacingInner={0.15}
+                        spacingOuter={0.20}
                     >
                         <Grid
                             svg={{
@@ -146,8 +147,8 @@ class CardWithChart extends React.Component {
                         style={{ marginLeft: 16 }}
                         data={data}
                         formatLabel={(value, index) => labels[index]}
-                        contentInset={{ left: 20, right: 25 }}
-                        svg={{ fontSize: 10, fill: 'black', fontWeight: 'bold' }}
+                        contentInset={{ left: 48, right: 50 }}
+                        svg={{ fontSize: 12, fill: 'black', fontWeight: 'bold' }}
                     />
                 </View>
             </View>
@@ -173,7 +174,7 @@ class CardWithChart extends React.Component {
         const devolucao = item.devolucao ? item.devolucao : 0;
         const margem = item.margem ? item.margem : 0;
         const data = [bruto, liquido, devolucao];
-        const labels = ['Bruto', 'Líquido', 'Devolução'];
+        const labels = ['   Bruto', ' Líquido ', 'Devolução   '];
 
         return (
             <Card
@@ -226,7 +227,7 @@ class CardWithChart extends React.Component {
                         </View> */}
                     </View>
                     <Divider style={{ marginVertical: 5 }} />
-                    <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+                    <View style={{ marginBottom: 10 }}>
                         <View style={{ flex: 1 }}>
                             {this.renderChartType(
                                 this.state.chartType, 
@@ -235,10 +236,11 @@ class CardWithChart extends React.Component {
                             )}
                         </View>
                         <View 
-                            style={{ 
-                                flex: 0.5, 
-                                justifyContent: 'space-between', 
-                                paddingLeft: 20 
+                            style={{
+                                flexDirection: 'row', 
+                                flex: 0.5,
+                                marginTop: 15,
+                                justifyContent: 'space-between'
                             }}
                         >
                             <View>
@@ -290,12 +292,13 @@ const styles = StyleSheet.create({
         paddingVertical: 5
     },
     textLabel: { 
-        fontWeight: '600' 
+        fontWeight: '600',
+        fontSize: 13
     },
     textValue: {
         color: 'black', 
         fontWeight: '500',
-        fontSize: 16
+        fontSize: 14
     }
 });
 

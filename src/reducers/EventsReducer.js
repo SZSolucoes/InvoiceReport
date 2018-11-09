@@ -2,7 +2,8 @@ const INITIAL_STATE = {
     conInfo: {},
     isSideMenuOpen: false,
     sideMenuSelected: 'regiao',
-    dxSideMenuPos: 0
+    dxSideMenuPos: 0,
+    showSearchBarMain: false
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -27,13 +28,19 @@ export default (state = INITIAL_STATE, action) => {
                 ...state,
                 dxSideMenuPos: action.payload 
             };
+        case 'modify_showsearchbarmain_events':
+            return {
+                ...state,
+                showSearchBarMain: action.payload 
+            };
         case 'modify_clean_events':
             return {
                 ...state,
                 conInfo: {},
                 isSideMenuOpen: false,
                 sideMenuSelected: 'regiao',
-                dxSideMenuPos: 0
+                dxSideMenuPos: 0,
+                showSearchBarMain: false
             };
         default:
             return state;

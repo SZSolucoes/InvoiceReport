@@ -41,7 +41,12 @@ class Routes extends React.Component {
                 }}
             >
                 <TouchableOpacity
-                    onPress={() => this.searchBarMainRef.getWrappedInstance().show()}
+                    onPress={
+                        () => store.dispatch({ 
+                            type: 'modify_showsearchbarmain_events', 
+                            payload: true 
+                        })
+                    }
                 >
                     <Icon
                         iconStyle={{ marginHorizontal: 5 }}
@@ -107,6 +112,7 @@ class Routes extends React.Component {
                         tabBarPosition={'top'}
                         lazy={false}
                         swipeEnabled
+                        hideNavBar={false}
                         title={getMenuName(store.getState().EventsReducer.sideMenuSelected)} 
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
@@ -149,7 +155,7 @@ class Routes extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 {this.renderRouter()}
-                <SearchBarMain ref={ref => (this.searchBarMainRef = ref)} />
+                <SearchBarMain />
                 <FadeScreenAnim />
                 <SideMenu />
             </View>

@@ -9,6 +9,7 @@ import {
 import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 
+import NavBarRightBtns from './components/main/NavBarRightBtns';
 import SearchBarMain from './components/main/SearchBarMain';
 import SideMenu from './components/main/SideMenu';
 import FadeScreenAnim from './components/main/FadeScreenAnim';
@@ -27,37 +28,6 @@ class Routes extends React.Component {
 
         this.renderRouter = this.renderRouter.bind(this);
         this.renderLeftGlobalMenuBtn = this.renderLeftGlobalMenuBtn.bind(this);
-        this.renderMainTabBarBtns = this.renderMainTabBarBtns.bind(this);
-    }
-
-    renderMainTabBarBtns() {
-        return (
-            <View 
-                style={{
-                    flexDirection: 'row',
-                    marginHorizontal: 5,
-                    paddingHorizontal: 10,
-                    justifyContent: 'space-between'
-                }}
-            >
-                <TouchableOpacity
-                    onPress={
-                        () => store.dispatch({ 
-                            type: 'modify_showsearchbarmain_events', 
-                            payload: true 
-                        })
-                    }
-                >
-                    <Icon
-                        iconStyle={{ marginHorizontal: 5 }}
-                        color={'white'}
-                        name='magnify'
-                        type='material-community'
-                        size={26}
-                    />
-                </TouchableOpacity>
-            </View>
-        );
     }
 
     renderLeftGlobalMenuBtn() {
@@ -121,7 +91,7 @@ class Routes extends React.Component {
                         labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
                         type={ActionConst.RESET}
                         renderLeftButton={() => this.renderLeftGlobalMenuBtn()}
-                        renderRightButton={() => this.renderMainTabBarBtns()}
+                        renderRightButton={<NavBarRightBtns />}
                     >
                         <Scene 
                             key={'diarioTab'}
@@ -155,9 +125,9 @@ class Routes extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 {this.renderRouter()}
-                <SearchBarMain />
-                <FadeScreenAnim />
-                <SideMenu />
+                <SearchBarMain zIndex={1} />
+                <FadeScreenAnim zIndex={2} />
+                <SideMenu zIndex={3} />
             </View>
         );
     }

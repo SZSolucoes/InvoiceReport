@@ -4,12 +4,14 @@ import {
     View,
     Dimensions,
     StyleSheet,
-    Platform
+    Platform,
+    Keyboard
 } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { modifyShowSearchBarMain } from '../../actions/EventsActions';
-import { colorAppPrimary } from '../../utils/constants';
+import { modifyReportFilterStr, modifyReportFilterLoading } from '../../actions/ReportActions';
+import { colorAppPrimary, getMenuName } from '../../utils/constants';
 
 class SearchBarMain extends React.Component {
 
@@ -17,21 +19,23 @@ class SearchBarMain extends React.Component {
         super(props);
 
         this.startShowSearchAnim = this.startShowSearchAnim.bind(this);
+        this.startKeyboardAnim = this.startKeyboardAnim.bind(this);
+        this.keyboardShow = this.keyboardShow.bind(this);
+        this.keyboardHide = this.keyboardHide.bind(this);
 
         this.mainViewHeight = 75;
-        
+        this.keyboardHeight = 0;
+        this.keyboardIsOpen = false;
+
+        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardShow);
+        this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardHide);
+
         this.state = {
             animSearchBarValue: new Animated.Value(Dimensions.get('window').height)
         };
     }
 
-    componentDidMount() {
-        console.log('searchbar montou');
-    }
-
     shouldComponentUpdate(nextProps, nextStates) {
-        console.log(nextProps.showSearchBarMain);
-        console.log(this.props.showSearchBarMain);
         if (nextProps.showSearchBarMain !== this.props.showSearchBarMain) {
             this.startShowSearchAnim(nextProps.showSearchBarMain);
         }
@@ -39,16 +43,40 @@ class SearchBarMain extends React.Component {
         return nextProps !== this.props || nextStates !== this.state;
     }
 
+    componentWillUnmount() {
+        this.keyboardDidShowListener.remove();
+        this.keyboardDidHideListener.remove();
+    }
+
+    keyboardShow(e) {
+        this.keyboardIsOpen = true;
+        this.keyboardHeight = e.endCoordinates.height;
+        if (this.props.showSearchBarMain) {
+            this.startKeyboardAnim(true, this.keyboardHeight);
+        }
+    }
+    
+    keyboardHide() {
+        this.keyboardIsOpen = false;
+        if (this.props.showSearchBarMain) {
+            this.startKeyboardAnim(false, this.keyboardHeight);
+        }
+    }
+
     startShowSearchAnim(showSearchBar) {
         if (showSearchBar) {
-            Animated.spring(
-                this.state.animSearchBarValue,
-                {
-                    toValue: Dimensions.get('window').height - this.mainViewHeight,
-                    bounciness: 0,
-                    useNativeDriver: true
-                }
-            ).start();
+            if (this.keyboardIsOpen) {
+                this.startKeyboardAnim(true, this.keyboardHeight);
+            } else {
+                Animated.spring(
+                    this.state.animSearchBarValue,
+                    {
+                        toValue: Dimensions.get('window').height - this.mainViewHeight,
+                        bounciness: 0,
+                        useNativeDriver: true
+                    }
+                ).start();
+            }
         } else {
             Animated.spring(
                 this.state.animSearchBarValue,
@@ -61,54 +89,72 @@ class SearchBarMain extends React.Component {
         }
     }
 
+    startKeyboardAnim(onShowKeyboard, keyboardHeight) {
+        if (onShowKeyboard) {
+            const pos = (Dimensions.get('window').height - keyboardHeight) - this.mainViewHeight;
+            Animated.spring(
+                this.state.animSearchBarValue,
+                {
+                    toValue: pos,
+                    bounciness: 0,
+                    useNativeDriver: true
+                }
+            ).start();
+        } else {
+            Animated.spring(
+                this.state.animSearchBarValue,
+                {
+                    toValue: Dimensions.get('window').height - this.mainViewHeight,
+                    bounciness: 0,
+                    useNativeDriver: true
+                }
+            ).start();
+        }
+    }
+
     render() {
         return (
             <Animated.View
                 style={{
                     position: 'absolute',
+                    zIndex: this.props.zIndex,
                     width: '100%',
                     height: this.mainViewHeight,
-                    transform: [{ translateY: this.state.animSearchBarValue }],
-                    ...Platform.select({
-                        ios: {
-                          shadowColor: 'rgba(0,0,0, .2)',
-                          shadowOffset: { height: 0, width: 0 },
-                          shadowOpacity: 1,
-                          shadowRadius: 1,
-                        },
-                        android: {
-                          elevation: 1,
-                        },
-                    }),
+                    transform: [{ translateY: this.state.animSearchBarValue }]
                 }}
             >
                 <View style={styles.mainView}>
-                    <View style={{ flex: 0.5 }} />
                     <View style={{ flex: 2 }}>
                         <SearchBar
                             autoCapitalize={'none'}
                             autoCorrect={false}
-                            //onFocus={() => this.props.modificaAnimatedHeigth(1)}
-                            //onBlur={() => this.props.modificaAnimatedHeigth(false)}
-                            //clearIcon={!!this.props.filterStr}
-                            /*showLoadingIcon={
-                                this.props.listJogos &&
-                                this.props.listJogos.length > 0 && 
-                                this.props.filterLoad
-                            }*/
+                            noIcon
+                            clearIcon={!!this.props.reportFilterStr}
+                            onClearText={() => this.props.modifyReportFilterLoading(false)}
+                            showLoadingIcon={this.props.reportFilterLoading}
                             containerStyle={{ 
                                 backgroundColor: 'transparent',
                                 borderTopWidth: 0, 
                                 borderBottomWidth: 0
                             }}
-                            searchIcon={{ size: 24 }}
-                            //value={this.props.filterStr}
-                            onChangeText={(value) => {
-                                //this.props.modificaFilterStr(value);
-                                //this.props.modificaFilterLoad(true);
+                            inputStyle={{ 
+                                backgroundColor: 'transparent', 
+                                borderBottomColor: 'white', 
+                                borderBottomWidth: 1, 
+                                margin: 0, 
+                                marginHorizontal: 8,
+                                paddingBottom: 0
                             }}
-                            //onClear={() => this.props.modificaFilterStr('')}
-                            placeholder='Buscar jogo...'
+                            value={this.props.reportFilterStr}
+                            onChangeText={(value) => {
+                                this.props.modifyReportFilterStr(value);
+                                this.props.modifyReportFilterLoading(true);
+                            }}
+                            placeholder={
+                                `Filtrar ${
+                                    getMenuName(this.props.sideMenuSelected).toLowerCase()
+                                }...`
+                            }
                         />
                     </View>
                     <View style={{ flex: 0.5 }} />
@@ -122,15 +168,32 @@ const styles = StyleSheet.create({
     mainView: {
         flex: 1,
         flexDirection: 'row',
-        backgroundColor: colorAppPrimary
+        paddingHorizontal: 5,
+        backgroundColor: colorAppPrimary,
+        ...Platform.select({
+            ios: {
+              shadowColor: 'rgba(0,0,0, .2)',
+              shadowOffset: { height: 0, width: 0 },
+              shadowOpacity: 1,
+              shadowRadius: 1,
+            },
+            android: {
+              elevation: 1,
+            },
+        }),
     }
 });
 
 const mapStateToProps = (state) => ({
-    showSearchBarMain: state.EventsReducer.showSearchBarMain
+    showSearchBarMain: state.EventsReducer.showSearchBarMain,
+    sideMenuSelected: state.EventsReducer.sideMenuSelected,
+    reportFilterStr: state.ReportReducer.reportFilterStr,
+    reportFilterLoading: state.ReportReducer.reportFilterLoading
 });
 
 export default connect(mapStateToProps, {
-    modifyShowSearchBarMain
+    modifyShowSearchBarMain, 
+    modifyReportFilterStr,
+    modifyReportFilterLoading
 }, null, { withRef: true })(SearchBarMain);
 

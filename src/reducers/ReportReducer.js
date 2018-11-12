@@ -1,7 +1,8 @@
 const INITIAL_STATE = {
     reportData: {},
     reportSelected: 'regiao',
-    reportFilterStr: ''
+    reportFilterStr: '',
+    reportFilterLoading: false
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -21,12 +22,18 @@ export default (state = INITIAL_STATE, action) => {
                 ...state,
                 reportFilterStr: action.payload
             };
+        case 'modify_reportfilterloading_report':
+            return {
+                ...state,
+                reportFilterLoading: action.payload
+            };
         case 'modify_clean_report':
             return {
                 ...state,
                 reportData: {},
                 reportSelected: 'regiao',
-                reportFilterStr: ''
+                reportFilterStr: '',
+                reportFilterLoading: false
             };
         default:
             return state;

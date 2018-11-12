@@ -44,7 +44,7 @@ class Projecao extends React.Component {
                 }
                 renderItem={this.renderProjecaoCards}
                 keyExtractor={(item, index) => index.toString()}
-                ListFooterComponent={(<View style={{ marginVertical: 15 }} />)}
+                ListFooterComponent={(<View style={{ marginVertical: 50 }} />)}
             />
         );
     }

@@ -89,10 +89,12 @@ class FadeScreenAnim extends React.Component {
         return (
             <TouchableWithoutFeedback
                 onPress={() => this.props.modifyIsSideMenuOpen(false)}
+                style={{ position: 'absolute', zIndex: this.props.zIndex }}
             >
                 <Animated.View 
                     style={{
-                        position: 'absolute', 
+                        position: 'absolute',
+                        zIndex: this.props.zIndex,
                         width: '100%',
                         height: '100%',
                         transform: [{ translateX: this.state.animScreenT }],

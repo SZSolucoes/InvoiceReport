@@ -44,7 +44,7 @@ class Acumulado extends React.Component {
                 }
                 renderItem={this.renderAcumuladoCards}
                 keyExtractor={(item, index) => index.toString()}
-                ListFooterComponent={(<View style={{ marginVertical: 15 }} />)}
+                ListFooterComponent={(<View style={{ marginVertical: 50 }} />)}
             />
         );
     }

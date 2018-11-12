@@ -4,3 +4,13 @@ export const modifyReportSelected = (value) => ({
     payload: value
 });
 
+export const modifyReportFilterStr = (value) => ({
+    type: 'modify_reportfilterstr_report',
+    payload: value
+});
+
+export const modifyReportFilterLoading = (value) => ({
+    type: 'modify_reportfilterloading_report',
+    payload: value
+});
+

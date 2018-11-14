@@ -9,6 +9,7 @@ import Axios from 'axios';
 import reducers from './reducers';
 import Routes from './Routes';
 import { fetchReport } from './utils/AxiosUtils';
+import { dispatchStorageKey } from './utils/storage';
 
 export const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
 
@@ -35,6 +36,13 @@ class App extends React.Component {
             'connectionChange',
             this.onNetInfoChanged
         );
+    }
+
+    componentDidMount() {
+        // Alimenta o redux com as keys do storage
+        dispatchStorageKey('urlServer', store.dispatch, 'modify_urlserver_login');
+        dispatchStorageKey('userLogin', store.dispatch, 'modify_userlogin_login');
+        dispatchStorageKey('userPass', store.dispatch, 'modify_userpass_login');
     }
 
     onNetInfoChanged(conInfo) {

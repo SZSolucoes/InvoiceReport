@@ -2,12 +2,14 @@
 import React from 'react';
 import { 
     View,
+    Text,
     StyleSheet, 
     StatusBar, 
     TouchableWithoutFeedback, 
     Keyboard,
     Platform,
-    Animated
+    Animated,
+    AsyncStorage
 } from 'react-native';
 import { Card, Icon, FormInput, Button } from 'react-native-elements';
 import { BarChart, Grid, XAxis, YAxis, StackedAreaChart } from 'react-native-svg-charts';
@@ -16,6 +18,13 @@ import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import * as shape from 'd3-shape';
 import { colorAppPrimary } from '../../utils/constants';
+import { getUIDKey, setStorageKey } from '../../utils/storage';
+
+import {
+    modifyUrlServer,
+    modifyUserLogin,
+    modifyUserPass
+ } from '../../actions/LoginActions';
 
 class Login extends React.Component {
 
@@ -24,10 +33,17 @@ class Login extends React.Component {
 
         this.changedLayout = true;
         this.numCharts = ['bar', 'area'];
+        this.keyboardHeight = 0;
+        this.serverNoFocused = true;
+        this.openViewLogin = false;
+        this.openViewServer = false;
 
         StatusBar.setBackgroundColor(colorAppPrimary, true);
 
         this.onPressEnter = this.onPressEnter.bind(this);
+        this.onAnimFormLogin = this.onAnimFormLogin.bind(this);
+        this.onAnimFormServer = this.onAnimFormServer.bind(this);
+        this.doResetUrlServer = this.doResetUrlServer.bind(this);
         this.keyboardShow = this.keyboardShow.bind(this);
         this.keyboardHide = this.keyboardHide.bind(this);
         this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardShow);
@@ -40,8 +56,10 @@ class Login extends React.Component {
             marginBottom: 0,
             animChart: new Animated.Value(1),
             animCard: new Animated.Value(0),
+            animCardServer: new Animated.Value(0),
             viewCardFields: 0,
             loadingOn: false,
+            changedLayoutServer: true,
             chartChoosed: this.numCharts[Math.floor(Math.random() * this.numCharts.length)],
             data: [
                 50, 10, 40, 95, 4, 24, null, 85, undefined, 0, 35, 53
@@ -70,64 +88,191 @@ class Login extends React.Component {
 
     onPressEnter() {
         this.setState({ loadingOn: true });
+        if (!this.openViewLogin) {
+            this.onAnimFormServer(false);
+        }
         setTimeout(() => {
             this.setState({ loadingOn: false });
+            setStorageKey('userLogin', this.props.userLogin);
+            setStorageKey('userPass', this.props.userPass);
             Actions.mainTabBar();
         }, 3000);
     }
 
-    keyboardShow(e) {
-        if (Platform.OS === 'ios') {
-            this.setState({ 
-                marginTop: 60, 
-                marginBottom: e.endCoordinates.height - 60 
+    onAnimFormLogin(up = false, isKeyboardEvent = false, callAnimServer = false) {
+        if (up) {
+            if (Platform.OS === 'ios') {
+                this.setState({ 
+                    marginTop: 60, 
+                    marginBottom: this.keyboardHeight - 60,
+                    changedLayoutServer: isKeyboardEvent
+                });
+            } else {
+                this.setState({ 
+                    marginTop: 50, 
+                    marginBottom: 0, 
+                    changedLayoutServer: isKeyboardEvent
+                });
+            }
+            
+            this.openViewLogin = true;
+
+            Animated.parallel([
+                Animated.spring(
+                    this.state.animCard,
+                    {
+                        toValue: 0,
+                        useNativeDriver: true
+                    }
+                ),
+                Animated.spring(
+                    this.state.animChart,
+                    {
+                        toValue: 0,
+                        useNativeDriver: true
+                    }
+                )
+            ], { useNativeDriver: true }).start(() => {
+                if (this.state.chartChoosed === 'bar') {
+                    this.setState({ chartChoosed: 'area' });
+                } else {
+                    this.setState({ chartChoosed: 'bar' });
+                }
             });
         } else {
-            this.setState({ marginTop: 50, marginBottom: 0 });
-        }
+            this.setState({ 
+                marginTop: 0, 
+                marginBottom: 0,
+                changedLayoutServer: isKeyboardEvent 
+            });
 
-        Animated.parallel([
-            Animated.spring(
-                this.state.animCard,
-                {
-                    toValue: 0,
-                    useNativeDriver: true
+            this.openViewLogin = false;
+
+            Animated.parallel([
+                Animated.spring(
+                    this.state.animCard,
+                    {
+                        toValue: this.state.viewCardFields,
+                        useNativeDriver: true
+                    }
+                ),
+                Animated.spring(
+                    this.state.animChart,
+                    {
+                        toValue: 1,
+                        useNativeDriver: true
+                    }
+                )
+            ], { useNativeDriver: true }).start(() => {
+                if (callAnimServer) {
+                    this.onAnimFormServer(true);
                 }
-            ),
-            Animated.spring(
-                this.state.animChart,
-                {
-                    toValue: 0,
-                    useNativeDriver: true
-                }
-            )
-        ], { useNativeDriver: true }).start(() => {
-            if (this.state.chartChoosed === 'bar') {
-                this.setState({ chartChoosed: 'area' });
+            });
+        }
+    }
+
+    onAnimFormServer(up = false, isKeyboardEvent = false) {
+        this.doResetUrlServer();
+
+        if (up) {
+            if (Platform.OS === 'ios') {
+                this.setState({ 
+                    marginTop: 60, 
+                    marginBottom: this.keyboardHeight - 60,
+                    changedLayoutServer: isKeyboardEvent
+                });
             } else {
-                this.setState({ chartChoosed: 'bar' });
+                this.setState({ 
+                    marginTop: 50, 
+                    marginBottom: 0,
+                    changedLayoutServer: isKeyboardEvent
+                });
             }
-        });
+
+            this.openViewServer = true;
+
+            Animated.parallel([
+                Animated.spring(
+                    this.state.animCardServer,
+                    {
+                        toValue: 0,
+                        useNativeDriver: true,
+                        bounciness: 0
+                    }
+                ),
+                Animated.spring(
+                    this.state.animChart,
+                    {
+                        toValue: 0,
+                        useNativeDriver: true,
+                        bounciness: 0
+                    }
+                )
+            ], { useNativeDriver: true }).start(() => {
+                if (this.state.chartChoosed === 'bar') {
+                    this.setState({ chartChoosed: 'area' });
+                } else {
+                    this.setState({ chartChoosed: 'bar' });
+                }
+            });
+        } else {
+            this.setState({ 
+                marginTop: 0, 
+                marginBottom: 0, 
+                changedLayoutServer: isKeyboardEvent 
+            });
+            this.openViewServer = false;
+            Animated.parallel([
+                Animated.spring(
+                    this.state.animCardServer,
+                    {
+                        toValue: this.state.viewCardFields,
+                        useNativeDriver: true
+                    }
+                ),
+                Animated.spring(
+                    this.state.animChart,
+                    {
+                        toValue: 1,
+                        useNativeDriver: true
+                    }
+                )
+            ], { useNativeDriver: true }).start();
+        }
+    }
+
+    doResetUrlServer() {
+        try {
+            const asyncFun = async () => {
+                const value = await AsyncStorage
+                .getItem(getUIDKey('urlServer'));
+                if (value) {
+                    this.props.modifyUrlServer(value);
+                } else {
+                    this.props.modifyUrlServer('');
+                }
+            };
+
+            asyncFun();
+        } catch (e) {
+            console.error(
+                'falha ao buscar url atraves do storage.'
+            );
+        }
+    }
+
+    keyboardShow(e) {
+        if (this.serverNoFocused) {
+            this.keyboardHeight = e.endCoordinates.height;
+            this.onAnimFormLogin(true, true);
+        }
     }
     
     keyboardHide() {
-        this.setState({ marginTop: 0, marginBottom: 0 });
-        Animated.parallel([
-            Animated.spring(
-                this.state.animCard,
-                {
-                    toValue: this.state.viewCardFields,
-                    useNativeDriver: true
-                }
-            ),
-            Animated.spring(
-                this.state.animChart,
-                {
-                    toValue: 1,
-                    useNativeDriver: true
-                }
-            )
-        ], { useNativeDriver: true }).start();
+        if (this.serverNoFocused) {
+            this.onAnimFormLogin(false, true);
+        }
+        this.serverNoFocused = true;
     }
 
     renderBarChart() {
@@ -261,15 +406,21 @@ class Login extends React.Component {
                         onLayout={
                             event => {
                                 if (this.changedLayout) {
+                                    const viewHeight = event.nativeEvent.layout.y;
+                                    this.state.animCardServer.setValue(viewHeight);
                                     Animated.spring(
                                         this.state.animCard,
                                         {
-                                            toValue: event.nativeEvent.layout.y,
+                                            toValue: viewHeight,
                                             useNativeDriver: true
                                         }
-                                    ).start();
-                                    this.changedLayout = false;
-                                    this.setState({ viewCardFields: event.nativeEvent.layout.y });
+                                    ).start(() => {
+                                        this.changedLayout = false;
+                                        this.setState({ 
+                                            viewCardFields: viewHeight,
+                                            changedLayoutServer: false 
+                                        });
+                                    });
                                 }
                             }
                         }
@@ -281,15 +432,119 @@ class Login extends React.Component {
                             right: 0,
                             left: 0,
                             backgroundColor: colorAppPrimary,
-                            transform: [{ translateY: this.state.animCard }],
+                            transform: [{ 
+                                translateY: this.state.changedLayoutServer ? 
+                                this.state.animCard : 
+                                this.state.animCardServer 
+                            }],
                             zIndex: 1
+                        }}
+                    >
+                        <Card
+                            containerStyle={{
+                                backgroundColor: colorAppPrimary,
+                                paddingHorizontal: 15,
+                                paddingTop: 40,
+                                borderWidth: 0
+                            }}
+                        >
+                            <TouchableWithoutFeedback
+                                onPress={() => this.urlServerRef.focus()}
+                            >
+                                <View style={[styles.viewField, { flex: 1 }]}>
+                                    <Icon
+                                        iconStyle={{ marginBottom: 6, marginLeft: 3 }}
+                                        color={'white'}
+                                        name='server-network'
+                                        type='material-community'
+                                        size={30}
+                                    />
+                                    <FormInput
+                                        ref={ref => (this.urlServerRef = ref)}
+                                        onFocus={() => (this.serverNoFocused = false)}
+                                        onChangeText={() => true}
+                                        containerStyle={styles.formInputContainer}
+                                        returnKeyType={'next'}
+                                        inputStyle={styles.input}
+                                        placeholder={'Endereço do servidor'}
+                                        placeholderTextColor={'grey'}
+                                        autoCapitalize={'none'}
+                                        value={this.props.urlServer}
+                                        onChangeText={(value) => this.props.modifyUrlServer(value)}
+                                        onSubmitEditing={() => {
+                                            Keyboard.dismiss();
+                                            try {
+                                                AsyncStorage.setItem(
+                                                    getUIDKey('urlServer'),
+                                                    this.props.urlServer
+                                                );
+                                                this.onAnimFormServer(false);
+                                            } catch (e) {
+                                                console.log('falha ao salvar url');
+                                            }
+                                        }}
+                                    />
+                                </View>
+                            </TouchableWithoutFeedback>
+                            <View 
+                                style={{ 
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    marginTop: 10
+                                }}
+                            >
+                                <View style={{ flex: 1 }}>
+                                    <Button
+                                        small
+                                        rounded
+                                        outline
+                                        title={'Salvar'}
+                                        onPress={() => {
+                                            Keyboard.dismiss();
+                                            try {
+                                                AsyncStorage.setItem(
+                                                    getUIDKey('urlServer'),
+                                                    this.props.urlServer
+                                                );
+                                                this.onAnimFormServer(false);
+                                            } catch (e) {
+                                                console.log('falha ao salvar url');
+                                            }
+                                        }}
+                                    />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Button
+                                        small
+                                        rounded
+                                        outline
+                                        title={'Cancelar'}
+                                        onPress={() => {
+                                            this.onAnimFormServer(false);
+                                            this.doResetUrlServer();
+                                        }}
+                                    />
+                                </View>
+                            </View>
+                        </Card>
+                    </Animated.View>
+                    <Animated.View
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            left: 0,
+                            backgroundColor: colorAppPrimary,
+                            transform: [{ translateY: this.state.animCard }],
+                            zIndex: 2
                         }}
                     >
                         <Card
                             containerStyle={styles.card}
                         >
                             <TouchableWithoutFeedback
-                                onPress={() => this.userNameFieldRef.focus()}
+                                onPress={() => this.userLoginRef.focus()}
                             >
                                 <View style={styles.viewField}>
                                     <Icon
@@ -300,23 +555,24 @@ class Login extends React.Component {
                                         size={34}
                                     />
                                     <FormInput
-                                        ref={ref => { this.userNameFieldRef = ref; }}
-                                        onChangeText={() => true} 
+                                        ref={ref => (this.userLoginRef = ref)}
                                         containerStyle={styles.formInputContainer}
                                         returnKeyType={'next'}
                                         inputStyle={styles.input}
                                         placeholder={'Usuário'}
                                         placeholderTextColor={'grey'}
                                         autoCapitalize={'none'}
+                                        value={this.props.userLogin}
+                                        onChangeText={(value) => this.props.modifyUserLogin(value)} 
                                         onSubmitEditing={
-                                            () => this.userPasswordFieldRef.focus()
+                                            () => this.userPassRef.focus()
                                         }
                                         blurOnSubmit={false}
                                     />
                                 </View>
                             </TouchableWithoutFeedback>
                             <TouchableWithoutFeedback
-                                onPress={() => this.userPasswordFieldRef.focus()}
+                                onPress={() => this.userPassRef.focus()}
                             >
                                 <View style={styles.viewField}>
                                     <TouchableWithoutFeedback
@@ -346,8 +602,7 @@ class Login extends React.Component {
                                         />
                                     </TouchableWithoutFeedback>
                                     <FormInput
-                                        ref={ref => { this.userPasswordFieldRef = ref; }}
-                                        onChangeText={() => true} 
+                                        ref={ref => (this.userPassRef = ref)}
                                         containerStyle={styles.formInputContainer}
                                         inputStyle={styles.input}
                                         placeholder={'Senha'}
@@ -355,6 +610,8 @@ class Login extends React.Component {
                                         secureTextEntry={this.state.inputUserPasswordEye}
                                         autoCapitalize={'none'}
                                         autoCorrect={false}
+                                        value={this.props.userPass}
+                                        onChangeText={(value) => this.props.modifyUserPass(value)} 
                                         onSubmitEditing={() => {
                                             Keyboard.dismiss();
                                             this.onPressEnter();
@@ -362,7 +619,7 @@ class Login extends React.Component {
                                     />
                                 </View>
                             </TouchableWithoutFeedback>
-                            <View style={{ marginVertical: 40 }}>
+                            <View style={{ marginTop: 40 }}>
                                 <Button
                                     small
                                     rounded
@@ -379,6 +636,28 @@ class Login extends React.Component {
                                         this.onPressEnter();
                                     }}
                                 />
+                                <TouchableWithoutFeedback
+                                    onPress={() => {
+                                        Keyboard.dismiss();
+                                        if (this.openViewLogin) {
+                                            this.onAnimFormLogin(false, false, true);
+                                        } else if (this.openViewServer) {
+                                            this.onAnimFormServer(false);
+                                        } else {
+                                            this.onAnimFormServer(true);
+                                        }
+                                    }}
+                                >
+                                    <Text 
+                                        style={{ 
+                                            marginTop: 15,
+                                            color: 'grey', 
+                                            textAlign: 'center' 
+                                        }}
+                                    >
+                                        Alterar servidor
+                                    </Text>
+                                </TouchableWithoutFeedback>
                             </View>
                         </Card>
                     </Animated.View>
@@ -426,8 +705,15 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = () => ({
+const mapStateToProps = (state) => ({
+    urlServer: state.LoginReducer.urlServer,
+    userLogin: state.LoginReducer.userLogin,
+    userPass: state.LoginReducer.userPass
 });
 
-export default connect(mapStateToProps, {})(Login);
+export default connect(mapStateToProps, {
+    modifyUrlServer,
+    modifyUserLogin,
+    modifyUserPass
+})(Login);
 

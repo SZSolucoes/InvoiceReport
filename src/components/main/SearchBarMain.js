@@ -5,9 +5,10 @@ import {
     Dimensions,
     StyleSheet,
     Platform,
-    Keyboard
+    Keyboard,
+    TouchableOpacity
 } from 'react-native';
-import { SearchBar } from 'react-native-elements';
+import { SearchBar, Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { modifyShowSearchBarMain } from '../../actions/EventsActions';
 import { modifyReportFilterStr, modifyReportFilterLoading } from '../../actions/ReportActions';
@@ -130,8 +131,14 @@ class SearchBarMain extends React.Component {
                             autoCorrect={false}
                             noIcon
                             clearIcon={!!this.props.reportFilterStr}
-                            onClearText={() => this.props.modifyReportFilterLoading(false)}
-                            showLoadingIcon={this.props.reportFilterLoading}
+                            onClearText={() => this.props.modifyReportFilterLoading(
+                                { diario: false, acumulado: false, projecao: false }
+                            )}
+                            showLoadingIcon={
+                                this.props.reportFilterLoading.diario ||
+                                this.props.reportFilterLoading.acumulado ||
+                                this.props.reportFilterLoading.projecao
+                            }
                             containerStyle={{ 
                                 backgroundColor: 'transparent',
                                 borderTopWidth: 0, 
@@ -148,7 +155,9 @@ class SearchBarMain extends React.Component {
                             value={this.props.reportFilterStr}
                             onChangeText={(value) => {
                                 this.props.modifyReportFilterStr(value);
-                                this.props.modifyReportFilterLoading(true);
+                                this.props.modifyReportFilterLoading(
+                                    { diario: true, acumulado: true, projecao: true }
+                                );
                             }}
                             placeholder={
                                 `Filtrar ${
@@ -157,7 +166,33 @@ class SearchBarMain extends React.Component {
                             }
                         />
                     </View>
-                    <View style={{ flex: 0.5 }} />
+                    <View 
+                        style={{ 
+                            flex: 0.5, 
+                            flexDirection: 'row', 
+                            alignItems: 'flex-start',
+                            justifyContent: 'center' 
+                        }}
+                    >
+                        <View style={{ flex: 1 }}>
+                            <View style={{ flex: 0.15 }} />
+                            <View style={{ flex: 1 }}>
+                                <TouchableOpacity
+                                    onPress={
+                                        () => this.props.modifyShowSearchBarMain(false)
+                                    }
+                                >
+                                    <Icon
+                                        iconStyle={{ marginHorizontal: 5 }}
+                                        color={'white'}
+                                        name={'chevron-down'}
+                                        type='material-community'
+                                        size={36}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
                 </View>
             </Animated.View>
         );

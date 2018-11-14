@@ -1,8 +1,10 @@
+import _ from 'lodash';
+
 const INITIAL_STATE = {
     reportData: {},
     reportSelected: 'regiao',
     reportFilterStr: '',
-    reportFilterLoading: false
+    reportFilterLoading: { diario: false, acumulado: false, projecao: false }
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -23,6 +25,9 @@ export default (state = INITIAL_STATE, action) => {
                 reportFilterStr: action.payload
             };
         case 'modify_reportfilterloading_report':
+            if (_.isEqual(state.reportFilterLoading, action.payload)) {
+                return state;
+            }
             return {
                 ...state,
                 reportFilterLoading: action.payload
@@ -33,7 +38,7 @@ export default (state = INITIAL_STATE, action) => {
                 reportData: {},
                 reportSelected: 'regiao',
                 reportFilterStr: '',
-                reportFilterLoading: false
+                reportFilterLoading: { diario: false, acumulado: false, projecao: false }
             };
         default:
             return state;

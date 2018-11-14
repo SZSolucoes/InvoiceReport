@@ -28,11 +28,15 @@ class Diario extends React.Component {
                     diarioData, reportFilterStr
                 );
             }
-            setTimeout(() => this.props.modifyReportFilterLoading(false), 1000);
+            setTimeout(() => this.props.modifyReportFilterLoading(
+                { ...this.props.reportFilterLoading, diario: false }
+            ), 1000);
             return diarioData;
         }
 
-        setTimeout(() => this.props.modifyReportFilterLoading(false), 1000);
+        setTimeout(() => this.props.modifyReportFilterLoading(
+            { ...this.props.reportFilterLoading, diario: false }
+        ), 1000);
         return [];
     }
 
@@ -50,7 +54,9 @@ class Diario extends React.Component {
 
     renderDiarioCards({ item, index }) {
         if (index === this.dataLength - 1) {
-            setTimeout(() => this.props.modifyReportFilterLoading(false), 1000);
+            setTimeout(() => this.props.modifyReportFilterLoading(
+                { ...this.props.reportFilterLoading, diario: false }
+            ), 1000);
         }
         return (
             <CardWithChart 
@@ -84,7 +90,8 @@ class Diario extends React.Component {
 const mapStateToProps = (state) => ({
     reportData: state.ReportReducer.reportData,
     reportSelected: state.ReportReducer.reportSelected,
-    reportFilterStr: state.ReportReducer.reportFilterStr
+    reportFilterStr: state.ReportReducer.reportFilterStr,
+    reportFilterLoading: state.ReportReducer.reportFilterLoading
 });
 
 export default connect(mapStateToProps, { modifyReportFilterLoading })(Diario);

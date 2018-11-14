@@ -20,6 +20,8 @@ import Projecao from './components/main/Projecao';
 
 import { store } from './App';
 import { colorAppSecondary, colorAppPrimary, getMenuName } from './utils/constants';
+import { getStorageKey } from './utils/storage';
+
 
 class Routes extends React.Component {
 
@@ -28,6 +30,25 @@ class Routes extends React.Component {
 
         this.renderRouter = this.renderRouter.bind(this);
         this.renderLeftGlobalMenuBtn = this.renderLeftGlobalMenuBtn.bind(this);
+
+        this.state = {
+            initialScene: 'loading'
+        };
+    }
+
+    componentDidMount() {
+        const asyncFun = async () => {
+            const userLogin = await getStorageKey('userLogin');
+            const userPass = await getStorageKey('userPass');
+
+            if (userLogin && userPass) {
+                this.setState({ initialScene: 'main' });
+            } else {
+                this.setState({ initialScene: 'login' });
+            }
+        };
+
+        asyncFun();
     }
 
     renderLeftGlobalMenuBtn() {
@@ -72,7 +93,7 @@ class Routes extends React.Component {
                         component={Login}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft} 
-                        initial
+                        initial={this.state.initialScene === 'login'}
                         hideNavBar
                     />
                     <Scene
@@ -83,6 +104,7 @@ class Routes extends React.Component {
                         lazy={false}
                         swipeEnabled
                         hideNavBar={false}
+                        initial={this.state.initialScene === 'main'}
                         title={getMenuName(store.getState().EventsReducer.sideMenuSelected)} 
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
@@ -122,6 +144,11 @@ class Routes extends React.Component {
     }
 
     render() {
+        if (this.state.initialScene === 'loading') {
+            return (
+                <View />
+            );
+        }
         return (
             <View style={{ flex: 1 }}>
                 {this.renderRouter()}

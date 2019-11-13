@@ -23,19 +23,27 @@ class Projecao extends React.Component {
             const projecaoData = reportData[reportSelected].projecao;
             this.dataLength = projecaoData.length;
             if (reportFilterStr) {
-                return this.filtredDataSourceControl(
+                const filtredData = this.filtredDataSourceControl(
                     projecaoData, reportFilterStr
                 );
+                
+                if (filtredData && filtredData.length === 0) {
+                    setTimeout(() => this.props.modifyReportFilterLoading(
+                        { ...this.props.reportFilterLoading, projecao: false }
+                    ), 100);
+                }
+
+                return filtredData;
             }
             setTimeout(() => this.props.modifyReportFilterLoading(
                 { ...this.props.reportFilterLoading, projecao: false }
-            ), 1000);
+            ), 100);
             return projecaoData;
         }
 
         setTimeout(() => this.props.modifyReportFilterLoading(
             { ...this.props.reportFilterLoading, projecao: false }
-        ), 1000);
+        ), 100);
         return [];
     }
 
@@ -55,7 +63,7 @@ class Projecao extends React.Component {
         if (index === this.dataLength - 1) {
             setTimeout(() => this.props.modifyReportFilterLoading(
                 { ...this.props.reportFilterLoading, projecao: false }
-            ), 1000);
+            ), 100);
         }
         return (
             <CardWithChart 

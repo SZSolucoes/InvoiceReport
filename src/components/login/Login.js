@@ -3,8 +3,7 @@ import React from 'react';
 import { 
     View,
     Text,
-    StyleSheet, 
-    StatusBar, 
+    StyleSheet,
     TouchableWithoutFeedback, 
     Keyboard,
     Platform,
@@ -37,8 +36,6 @@ class Login extends React.Component {
         this.serverNoFocused = true;
         this.openViewLogin = false;
         this.openViewServer = false;
-
-        StatusBar.setBackgroundColor(colorAppPrimary, true);
 
         this.onPressEnter = this.onPressEnter.bind(this);
         this.onAnimFormLogin = this.onAnimFormLogin.bind(this);
@@ -491,7 +488,8 @@ class Login extends React.Component {
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    marginTop: 10
+                                    marginTop: 10,
+                                    marginBottom: 30
                                 }}
                             >
                                 <View style={{ flex: 1 }}>
@@ -648,15 +646,22 @@ class Login extends React.Component {
                                         }
                                     }}
                                 >
-                                    <Text 
+                                    <View 
                                         style={{ 
-                                            marginTop: 15,
-                                            color: 'grey', 
-                                            textAlign: 'center' 
+                                            marginTop: 15, 
+                                            marginHorizontal: 70, 
+                                            padding: 5
                                         }}
                                     >
-                                        Alterar servidor
-                                    </Text>
+                                        <Text 
+                                            style={{
+                                                color: 'grey', 
+                                                textAlign: 'center' 
+                                            }}
+                                        >
+                                            Alterar servidor
+                                        </Text>
+                                    </View>
                                 </TouchableWithoutFeedback>
                             </View>
                         </Card>

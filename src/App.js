@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { YellowBox, NetInfo } from 'react-native';
+import { YellowBox, NetInfo, StatusBar } from 'react-native';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import ReduxThunk from 'redux-thunk';
@@ -10,6 +10,7 @@ import reducers from './reducers';
 import Routes from './Routes';
 import { fetchReport } from './utils/AxiosUtils';
 import { dispatchStorageKey } from './utils/storage';
+import { colorAppPrimary } from './utils/constants';
 
 export const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
 
@@ -39,6 +40,7 @@ class App extends React.Component {
     }
 
     componentDidMount() {
+        StatusBar.setBackgroundColor(colorAppPrimary, true);
         // Alimenta o redux com as keys do storage
         dispatchStorageKey('urlServer', store.dispatch, 'modify_urlserver_login');
         dispatchStorageKey('userLogin', store.dispatch, 'modify_userlogin_login');

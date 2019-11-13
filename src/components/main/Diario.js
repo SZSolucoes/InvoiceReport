@@ -24,19 +24,27 @@ class Diario extends React.Component {
             const diarioData = reportData[reportSelected].diario;
             this.dataLength = diarioData.length;
             if (reportFilterStr) {
-                return this.filtredDataSourceControl(
+                const filtredData = this.filtredDataSourceControl(
                     diarioData, reportFilterStr
                 );
+
+                if (filtredData && filtredData.length === 0) {
+                    setTimeout(() => this.props.modifyReportFilterLoading(
+                        { ...this.props.reportFilterLoading, diario: false }
+                    ), 100);
+                }
+
+                return filtredData;
             }
             setTimeout(() => this.props.modifyReportFilterLoading(
                 { ...this.props.reportFilterLoading, diario: false }
-            ), 1000);
+            ), 100);
             return diarioData;
         }
 
         setTimeout(() => this.props.modifyReportFilterLoading(
             { ...this.props.reportFilterLoading, diario: false }
-        ), 1000);
+        ), 100);
         return [];
     }
 
@@ -56,7 +64,7 @@ class Diario extends React.Component {
         if (index === this.dataLength - 1) {
             setTimeout(() => this.props.modifyReportFilterLoading(
                 { ...this.props.reportFilterLoading, diario: false }
-            ), 1000);
+            ), 100);
         }
         return (
             <CardWithChart 

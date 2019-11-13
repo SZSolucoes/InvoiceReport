@@ -23,19 +23,27 @@ class Acumulado extends React.Component {
             const acumuladoData = reportData[reportSelected].acumulado;
             this.dataLength = acumuladoData.length;
             if (reportFilterStr) {
-                return this.filtredDataSourceControl(
+                const filtredData = this.filtredDataSourceControl(
                     acumuladoData, reportFilterStr
                 );
+
+                if (filtredData && filtredData.length === 0) {
+                    setTimeout(() => this.props.modifyReportFilterLoading(
+                        { ...this.props.reportFilterLoading, acumulado: false }
+                    ), 100);
+                }
+
+                return filtredData;
             }
             setTimeout(() => this.props.modifyReportFilterLoading(
                 { ...this.props.reportFilterLoading, acumulado: false }
-            ), 1000);
+            ), 100);
             return acumuladoData;
         }
 
         setTimeout(() => this.props.modifyReportFilterLoading(
             { ...this.props.reportFilterLoading, acumulado: false }
-        ), 1000);
+        ), 100);
         return [];
     }
 
@@ -55,7 +63,7 @@ class Acumulado extends React.Component {
         if (index === this.dataLength - 1) {
             setTimeout(() => this.props.modifyReportFilterLoading(
                 { ...this.props.reportFilterLoading, acumulado: false }
-            ), 1000);
+            ), 100);
         }
         return (
             <CardWithChart 

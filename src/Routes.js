@@ -42,7 +42,7 @@ class Routes extends React.Component {
             const userPass = await getStorageKey('userPass');
 
             if (userLogin && userPass) {
-                this.setState({ initialScene: 'main' });
+                this.setState({ initialScene: 'login' });
             } else {
                 this.setState({ initialScene: 'login' });
             }

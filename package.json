@@ -9,7 +9,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "d3-shape": "^1.2.2",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "moment": "^2.22.2",
     "normalize-strings": "^1.1.0",
     "react": "16.5.0",
